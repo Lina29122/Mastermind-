@@ -1,0 +1,78 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+
+const int NUM_PAWNS = 5;
+const int NUM_COLORS = 8;
+const int NUM_ATTEMPTS = 10;
+
+enum color_t { RED, GREEN, BLUE, YELLOW, BLACK, WHITE, GRAY, PURPLE };
+
+void read_proposed_combination(color_t board[]) {
+    std::cout << "Enter your guess (0-7 for colors, separated by spaces): ";
+    for (int i = 0; i < NUM_PAWNS; ++i) {
+        int color;
+        std::cin >> color;
+        board[i] = static_cast<color_t>(color);
+    }
+}
+
+void evaluate_proposed_combination(color_t hidden_combination[], color_t proposed_combination[], int *num_well_placed_pawns, int *num_misplaced_pawns) {
+    *num_well_placed_pawns = 0;
+    *num_misplaced_pawns = 0;
+
+    for (int i = 0; i < NUM_PAWNS; ++i) {
+        if (proposed_combination[i] == hidden_combination[i]) {
+            ++(*num_well_placed_pawns);
+        } else {
+            for (int j = 0; j < NUM_PAWNS; ++j) {
+                if (i != j && proposed_combination[i] == hidden_combination[j]) {
+                    ++(*num_misplaced_pawns);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void generate_hidden_combination(color_t hidden_combination[]) {
+    for (int i = 0; i < NUM_PAWNS; ++i) {
+        hidden_combination[i] = static_cast<color_t>(std::rand() % NUM_COLORS);
+    }
+}
+
+void game() {
+    color_t hidden_combination[NUM_PAWNS];
+    color_t proposed_combination[NUM_PAWNS];
+    int num_well_placed_pawns, num_misplaced_pawns;
+
+    generate_hidden_combination(hidden_combination);
+
+    for (int attempt = 1; attempt <= NUM_ATTEMPTS; ++attempt) {
+        read_proposed_combination(proposed_combination);
+        evaluate_proposed_combination(hidden_combination, proposed_combination, &num_well_placed_pawns, &num_misplaced_pawns);
+
+        std::cout << "Well-placed pawns: " << num_well_placed_pawns << ", Misplaced pawns: " << num_misplaced_pawns << "\n";
+
+        if (num_well_placed_pawns == NUM_PAWNS) {
+            std::cout << "Congratulations! You guessed the hidden combination.\n";
+            return;
+        }
+    }
+
+    std::cout << "Game over. The hidden combination was: ";
+    for (int i = 0; i < NUM_PAWNS; ++i) {
+        std::cout << hidden_combination[i] << " ";
+    }
+    std::cout << "\n";
+}
+
+int main() {
+    // Set up random seed
+    std::srand(std::time(0));
+
+    // Run the game
+    game();
+
+    return 0;
+}
